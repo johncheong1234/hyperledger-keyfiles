@@ -16,7 +16,7 @@ Add the folders 'reconcile' and 'parse-service' into the 'fabric-samples' direct
 In the test-network sub-directory, enter:
 python com.py
 
-cd into reconcile/app-javascript, enter:
+cd into reconcile/application-javascript, enter:
 nodemon app.js
 
 If this fails, you might need to enter: 
