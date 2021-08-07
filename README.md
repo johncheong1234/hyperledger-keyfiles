@@ -3,8 +3,12 @@ Key Files for the hyperledger fabric for Equities Trade Reconciliation
 
 Clone the repo to your local computer.
 
-Create a directory and use this command: 
+Create a directory, cd into it and execute a bashscript by using these commands: 
+mkdir -p $HOME/go/src/github.com/<your_github_userid>
+cd $HOME/go/src/github.com/<your_github_userid>
 curl -sSL https://bit.ly/2ysbOFE | bash -s
+
+Refer to https://hyperledger-fabric.readthedocs.io/en/latest/install.html for more details
 
 Add the com.py file into the 'fabric-samples/test-network' sub-directory that would have been committed.
 Add the folders 'reconcile' and 'parse-service' into the 'fabric-samples' directory that would have been committed.
