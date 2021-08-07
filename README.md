@@ -4,9 +4,9 @@ Key Files for the hyperledger fabric for Equities Trade Reconciliation
 Clone the repo to your local computer.
 
 Create a directory, cd into it and execute a bashscript by using these commands: 
-mkdir -p $HOME/go/src/github.com/<your_github_userid>
-cd $HOME/go/src/github.com/<your_github_userid>
-curl -sSL https://bit.ly/2ysbOFE | bash -s
+1) mkdir -p $HOME/go/src/github.com/<your_github_userid>
+2) cd $HOME/go/src/github.com/<your_github_userid>
+3) curl -sSL https://bit.ly/2ysbOFE | bash -s
 
 Refer to https://hyperledger-fabric.readthedocs.io/en/latest/install.html for more details
 
