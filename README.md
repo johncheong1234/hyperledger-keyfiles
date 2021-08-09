@@ -29,8 +29,8 @@ nodemon app.js
 
 5 Key Endpoints:
 
-1) http://localhost:3000/read_sgx (For reading SGX rows on the blockchain)
-2) http://localhost:3000/read_primo (For reading Primo rows on the blockchain)
-3) http://localhost:3002/upload_sgx (For uploading SGX rows to the blockchain)
-4) http://localhost:3002/upload_primo (For uploading Primo rows to the blockchain)
+1) http://localhost:3000/read_sgx (GET REQUEST: For reading SGX rows on the blockchain)
+2) http://localhost:3000/read_primo (GET REQUEST: For reading Primo rows on the blockchain)
+3) http://localhost:3002/upload_sgx_complex (POST REQUEST (with xlsx file in form data): For uploading SGX rows to the blockchain)
+4) http://localhost:3002/upload_primo_complex (POST REQUEST (with xlsx file in form data): For uploading Primo rows to the blockchain)
 5) http://localhost:3002/update_status_complex (For modifying the reconciliation status of SGX and Primo rows on the blockchain)
