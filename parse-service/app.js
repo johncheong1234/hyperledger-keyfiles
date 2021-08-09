@@ -1,9 +1,12 @@
 const express = require('express')
 const app = express()
+const fileUpload = require('express-fileupload');
 const port = 3002
 var xlsx = require('node-xlsx').default;
 
 const axios = require('axios')
+
+app.use(fileUpload());
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -11,14 +14,14 @@ app.get('/', (req, res) => {
 
 app.get('/parse_sgx', (req, res) => {
     
-    const resulty = xlsx.parse(`${__dirname}/New_sgx_2.xlsx`);
+    const resulty = xlsx.parse(`${__dirname}/sgx.xlsx`);
     // console.log(result)
 
     var result = resulty[0]['data'].slice(1)
 
     for(const i of result){
   
-        const new_i = i[2].split('')
+      const new_i = i[2].split('')
       new_i.splice(3,0,'.')
       for(var k=1;k>=0;k--){
         if(new_i[k]=='0'){
@@ -44,45 +47,76 @@ app.get('/parse_sgx', (req, res) => {
 
 app.get('/parse_primo', (req, res) => {
     
-    const result = xlsx.parse(`${__dirname}/New_primo_2.xlsx`);
+    const result = xlsx.parse(`${__dirname}/primo.xlsx`);
     console.log(result)
     res.send(result[0]['data'].slice(1))
 
 
 })
 
-app.get('/upload_primo',(req,res)=>{
+app.post('/upload_sgx_complex',(req,res)=>{
 
-    axios.get('http://localhost:3002/parse_primo').then(resp => {
+  let sgx;
+  let uploadPath;
 
-    console.log(resp.data);
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
 
-    var sgx_data = resp.data
+  uploadPath = __dirname + '/' + 'sgx.xlsx';
+  sgx = req.files.myFile;
 
-    axios.post('http://localhost:3000/create_primo', sgx_data)
-      .then(function (response) {
-        console.log(response);
-        res.send(response.data)
-      })
-});
-   
-})
+  
+  sgx.mv(uploadPath, function(err) {
+    if (err)
+      return res.status(500).send(err);
 
-app.get('/upload_sgx',(req,res)=>{
-
+    // res.send('File uploaded!');
     axios.get('http://localhost:3002/parse_sgx').then(resp => {
 
-    console.log(resp.data);
+      console.log(resp.data);
+  
+      var sgx_data = resp.data
+  
+      axios.post('http://localhost:3000/create_sgx', sgx_data)
+        .then(function (response) {
+          console.log(response);
+          res.send(response.data)
+        })
+  });
+  });
+})
 
-    var sgx_data = resp.data
+app.post('/upload_primo_complex',(req,res)=>{
 
-    axios.post('http://localhost:3000/create_sgx', sgx_data)
-      .then(function (response) {
-        console.log(response);
-        res.send(response.data)
-      })
-});
-   
+  let primo;
+  let uploadPath;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  uploadPath = __dirname + '/' + 'primo.xlsx';
+  primo = req.files.myFile;
+
+  
+  primo.mv(uploadPath, function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+      axios.get('http://localhost:3002/parse_primo').then(resp => {
+
+        console.log(resp.data);
+    
+        var sgx_data = resp.data
+    
+        axios.post('http://localhost:3000/create_primo', sgx_data)
+          .then(function (response) {
+            console.log(response);
+            res.send(response.data)
+          })
+    });
+  });
 })
 
 app.get('/update_status_complex',(req,res)=>{
@@ -216,6 +250,40 @@ app.get('/update_status_complex',(req,res)=>{
 
   })
 })
+// app.get('/upload_sgx',(req,res)=>{
+
+//     axios.get('http://localhost:3002/parse_sgx').then(resp => {
+
+//     console.log(resp.data);
+
+//     var sgx_data = resp.data
+
+//     axios.post('http://localhost:3000/create_sgx', sgx_data)
+//       .then(function (response) {
+//         console.log(response);
+//         res.send(response.data)
+//       })
+// });
+   
+// })
+
+// app.get('/upload_primo',(req,res)=>{
+
+//     axios.get('http://localhost:3002/parse_primo').then(resp => {
+
+//     console.log(resp.data);
+
+//     var sgx_data = resp.data
+
+//     axios.post('http://localhost:3000/create_primo', sgx_data)
+//       .then(function (response) {
+//         console.log(response);
+//         res.send(response.data)
+//       })
+// });
+   
+// })
+
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
