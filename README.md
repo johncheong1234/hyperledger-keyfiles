@@ -33,4 +33,6 @@ nodemon app.js
 2) http://localhost:3000/read_primo (GET REQUEST: For reading Primo rows on the blockchain)
 3) http://localhost:3002/upload_sgx_complex (POST REQUEST (with xlsx file in form data): For uploading SGX rows to the blockchain)
 4) http://localhost:3002/upload_primo_complex (POST REQUEST (with xlsx file in form data): For uploading Primo rows to the blockchain)
-5) http://localhost:3002/update_status_complex (For modifying the reconciliation status of SGX and Primo rows on the blockchain)
+5) http://localhost:3002/update_status_complex (GET REQUEST For modifying the reconciliation status of SGX and Primo rows on the blockchain - MUST BE CALLED AFTER 7 because after modification of status, reconcile end point not listed here will not work, causing 7 to fail)
+6) http://localhost:3000/read_reconcile (GET REQUEST For reading Reconcile blocks on blockchain)
+7) http://localhost:3002/create_reconcile_complex (GET REQUEST For uploading Reconcile blocks onto blockchain - MUST BE CALLED BEFORE 5 because after modification of status, reconcile end point not listed here will not work, causing 7 to fail)
