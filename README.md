@@ -27,7 +27,7 @@ If there are issues with discovery service, delete the wallet directory in app-j
 cd into parse-service, enter:
 nodemon app.js
 
-5 Key Endpoints:
+7 Key Endpoints:
 
 1) http://localhost:3000/read_sgx (GET REQUEST: For reading SGX rows on the blockchain)
 2) http://localhost:3000/read_primo (GET REQUEST: For reading Primo rows on the blockchain)
