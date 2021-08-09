@@ -25,7 +25,7 @@ const express = require('express');
 const { start } = require('repl');
 const { response } = require('express');
 const app = express()
-const port = 3000
+const port = 3001
 
 var contract_sgx;
 var contract_primo;
