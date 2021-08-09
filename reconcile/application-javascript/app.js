@@ -25,6 +25,10 @@ const express = require('express');
 const { start } = require('repl');
 const { response } = require('express');
 const app = express()
+const cors = require('cors');
+app.use(cors({
+    origin: '*'
+}));
 const port = 3001
 
 var contract_sgx;

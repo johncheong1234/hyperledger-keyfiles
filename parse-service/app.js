@@ -1,5 +1,9 @@
 const express = require('express')
 const app = express()
+const cors = require('cors');
+app.use(cors({
+    origin: '*'
+}));
 const fileUpload = require('express-fileupload');
 const port = 3002
 var xlsx = require('node-xlsx').default;
