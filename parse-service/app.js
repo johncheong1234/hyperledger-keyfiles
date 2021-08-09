@@ -250,6 +250,46 @@ app.get('/update_status_complex',(req,res)=>{
 
   })
 })
+
+app.get('/create_reconcile_complex',function(request,response){
+	axios.get('http://localhost:3000/reconcile').then(resp=>{
+
+    const block_trades = []
+
+    var reconciled_sgx = resp.data['reconciled_sgx']
+    var reconciled_primo = resp.data['reconciled_primo']
+
+    for(const s_block of reconciled_sgx){
+      const block_dict = {}
+      for(const s_id in s_block){
+        const sgx_q_id = JSON.parse(s_block[s_id])
+        const quantity = sgx_q_id['Quantity']
+        const sgx_id = sgx_q_id['ID_list']
+        block_dict['recon_id'] = s_id;
+        block_dict['Quantity'] = quantity;
+        block_dict['SGX_ID'] = sgx_id;
+
+        for(const p_block of reconciled_primo){
+          if(s_id in p_block){
+            const primo_q_id = JSON.parse(p_block[s_id])
+            block_dict['PRIMO_ID'] = primo_q_id['ID_list']
+          }
+        }
+
+        block_trades.push(block_dict)
+      }
+    }
+
+    axios.post('http://localhost:3000/create_reconcile', block_trades)
+        .then(function (resp) {
+          console.log(resp);
+          response.send(resp.data)
+        })
+
+    // response.send(JSON.stringify(block_trades))
+  })
+})
+
 // app.get('/upload_sgx',(req,res)=>{
 
 //     axios.get('http://localhost:3002/parse_sgx').then(resp => {

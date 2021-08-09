@@ -383,6 +383,30 @@ app.get('/reconcile',function(request,response){
 	)
 })
 
+app.post('/create_reconcile',function(request,response){
+	contract_reconcile.evaluateTransaction('GetLength').then(function(value){
+	for(let i=0; i<request.body.length; i++){
+	var id = parseInt(i)+parseInt(value);
+	contract_reconcile.submitTransaction('CreateBlock',id,request.body[i].recon_id, request.body[i].Quantity, request.body[i].SGX_ID, request.body[i].PRIMO_ID).then(function(value){
+		console.log(request.body[i])
+	}).catch((error) => {
+		console.error(error);
+	  });
+	
+	}
+	})
+	response.send('Reconcile blocks made')
+})
+
+app.get('/read_reconcile', (req, res) => {
+	//read entire chain
+	// res.send(req.all)
+	contract_reconcile.evaluateTransaction('GetAllAssets').then(function(value){
+		const all = value.toString()
+		res.send(all)
+	})
+})
+
 
 app.listen(port, () => {
 	console.log(`Example app listening at http://localhost:${port}`)

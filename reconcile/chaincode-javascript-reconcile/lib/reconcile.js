@@ -28,63 +28,55 @@ class Reconcile extends Contract {
         const sgx_assets = JSON.parse(sgx.payload.toString('utf8'));
         const primo_assets = JSON.parse(primo.payload.toString('utf8'));
         const parsed_primo_assets = []
+        const parsed_sgx_assets = []
 
-        // for (const asset of assets) {
-        //     asset.docType = 'asset';
-        //     await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
-        //     console.info(`Asset ${asset.ID} initialized`);
-        // }
-
-        // const all_assets = sgx_assets.concat(primo_assets)
-
-        const ISIN = []
-
-        for(var i=0; i<sgx_assets.length; i++){
-            if(!ISIN.includes(sgx_assets[i]['Record']['ISIN'])){
-                ISIN.push(sgx_assets[i]['Record']['ISIN'])
+        for(var i=0;i<sgx_assets.length;i++){
+            if(sgx_assets[i]['Record']['Status']=='pending'){
+                parsed_sgx_assets.push(sgx_assets[i])
             }
         }
 
-        // for(var i=0; i<ISIN.length; i++){
-        //     for(var j=primo_assets.length; j>=0; j--){
-        //         if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
-                    
-        //             parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
-                  
-        //         }
-        //     }
-        // }
+        const ISIN = []
+
+        for(var i=0; i<parsed_sgx_assets.length; i++){
+            if(!ISIN.includes(parsed_sgx_assets[i]['Record']['ISIN'])){
+                ISIN.push(parsed_sgx_assets[i]['Record']['ISIN'])
+            }
+        }
 
         var includes = false;
 
         for(var j=0; j<primo_assets.length; j++){
+            if(primo_assets[j]['Record']['Status']=='pending'){
             for(var i=0; i<ISIN.length; i++){
                 if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
                 includes = true;
                 parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
                 break
                 }
-        }
+                
+            }
 
-        if(includes == true){
-            includes = false;
-        }else{
-            parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
-        }
+            if(includes == true){
+                includes = false;
+            }else{
+                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+            }
         
+        }
         }
 
         const sgx_dict = {}
         const primo_dict = {}
 
-        for(var i=0; i<sgx_assets.length; i++){
-            var elements = [sgx_assets[i]['Record']['ISIN'],sgx_assets[i]['Record']['RT'],sgx_assets[i]['Record']['CLINO'],sgx_assets[i]['Record']['Settlement_price'],sgx_assets[i]['Record']['Execution_date']]
+        for(var i=0; i<parsed_sgx_assets.length; i++){
+            var elements = [parsed_sgx_assets[i]['Record']['ISIN'],parsed_sgx_assets[i]['Record']['RT'],parsed_sgx_assets[i]['Record']['CLINO'],parsed_sgx_assets[i]['Record']['Settlement_price'],parsed_sgx_assets[i]['Record']['Execution_date']]
             var sgx_string = elements.join('_');
             if(sgx_dict[sgx_string]){
-                sgx_dict[sgx_string]['Quantity'] += parseInt(sgx_assets[i]['Record']['Quantity']);
-                sgx_dict[sgx_string]['ID_list'].push(sgx_assets[i]['Record']['ID'])
+                sgx_dict[sgx_string]['Quantity'] += parseInt(parsed_sgx_assets[i]['Record']['Quantity']);
+                sgx_dict[sgx_string]['ID_list'].push(parsed_sgx_assets[i]['Record']['ID'])
             }else{
-                sgx_dict[sgx_string] = {'Quantity':parseInt(sgx_assets[i]['Record']['Quantity']), 'ID_list':[sgx_assets[i]['Record']['ID']]};
+                sgx_dict[sgx_string] = {'Quantity':parseInt(parsed_sgx_assets[i]['Record']['Quantity']), 'ID_list':[parsed_sgx_assets[i]['Record']['ID']]};
             }
         }
 
@@ -177,6 +169,24 @@ class Reconcile extends Contract {
         return JSON.stringify(asset);
     }
 
+    async CreateBlock(ctx, id,recon_id, quantity, sgx_list, primo_list) {
+        const exists = await this.AssetExists(ctx, id);
+        if (exists) {
+            throw new Error(`The asset ${id} already exists`);
+        }
+
+        const asset = {
+            Block_ID: id,
+            Recon_ID: recon_id,
+            Quantity: quantity,
+            sgx_list: sgx_list,
+            Primo_list: primo_list,
+        };
+        
+        await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
+        return JSON.stringify(asset);
+    }
+
     // ReadAsset returns the asset stored in the world state with given id.
     async ReadAsset(ctx, id) {
         const assetJSON = await ctx.stub.getState(id); // get the asset from chaincode state
@@ -242,6 +252,26 @@ class Reconcile extends Contract {
             result = await iterator.next();
         }
         return JSON.stringify(allResults);
+    }
+
+    async GetLength(ctx) {
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            allResults.push({ Key: result.value.key, Record: record });
+            result = await iterator.next();
+        }
+        return allResults.length;
     }
 
     async reconcile(ctx) {
