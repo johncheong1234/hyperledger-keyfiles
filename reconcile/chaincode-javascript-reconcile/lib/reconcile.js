@@ -25,12 +25,9 @@ class Reconcile extends Contract {
 
         // const allassets = sgx.concat(primo)
 
-        const sgx_assets_results = JSON.parse(sgx.payload.toString('utf8'));
-        const primo_assets_results = JSON.parse(primo.payload.toString('utf8'));
+        const sgx_assets = JSON.parse(sgx.payload.toString('utf8'));
+        const primo_assets = JSON.parse(primo.payload.toString('utf8'));
         const parsed_primo_assets = []
-
-        const sgx_assets = sgx_assets_results.filter(asset => asset['Record']['Status'] == 'pending');
-        const primo_assets = primo_assets_results.filter(asset => asset['Record']['Status'] == 'pending');
 
         // for (const asset of assets) {
         //     asset.docType = 'asset';
@@ -48,13 +45,33 @@ class Reconcile extends Contract {
             }
         }
 
-        for(var i=0; i<ISIN.length; i++){
-            for(var j=0; j<primo_assets.length; j++){
-                if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
+        // for(var i=0; i<ISIN.length; i++){
+        //     for(var j=primo_assets.length; j>=0; j--){
+        //         if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
                     
-                    parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+        //             parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+                  
+        //         }
+        //     }
+        // }
+
+        var includes = false;
+
+        for(var j=0; j<primo_assets.length; j++){
+            for(var i=0; i<ISIN.length; i++){
+                if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
+                includes = true;
+                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+                break
                 }
-            }
+        }
+
+        if(includes == true){
+            includes = false;
+        }else{
+            parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+        }
+        
         }
 
         const sgx_dict = {}
@@ -135,6 +152,7 @@ class Reconcile extends Contract {
           }
 
         return {'failed_sgx':failed_sgx,'failed_primo': failed_primo,'reconciled_sgx':reconciled_sgx, 'reconciled_primo':reconciled_primo};
+        // return {'parsed': parsed_primo_assets, primo_dict: primo_dict}
     }
 
     // CreateAsset issues a new asset to the world state with given details.
