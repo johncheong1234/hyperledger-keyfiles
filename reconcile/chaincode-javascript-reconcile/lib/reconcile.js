@@ -274,6 +274,14 @@ class Reconcile extends Contract {
         return allResults.length;
     }
 
+    async ReadAsset(ctx, id) {
+        const assetJSON = await ctx.stub.getState(id); // get the asset from chaincode state
+        if (!assetJSON || assetJSON.length === 0) {
+            throw new Error(`The asset ${id} does not exist`);
+        }
+        return assetJSON.toString();
+    }
+
     async reconcile(ctx) {
         const sgx = [];
         const primo = []

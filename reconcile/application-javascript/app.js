@@ -243,6 +243,16 @@ app.get('/one_primo/:asset',(req,res)=>{
 	
 })
 
+app.get('/one_reconcile/:asset',(req,res)=>{
+	//read one node in chain
+	contract_reconcile.evaluateTransaction('ReadAsset', req.params.asset).then(function(value){
+		const one = value.toString()
+		console.log(one)
+		res.send(one)
+	})
+	
+})
+
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
 
