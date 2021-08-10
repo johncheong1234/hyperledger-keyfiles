@@ -29,7 +29,7 @@ const cors = require('cors');
 app.use(cors({
     origin: '*'
 }));
-const port = 3001
+const port = 3000
 
 var contract_sgx;
 var contract_primo;
