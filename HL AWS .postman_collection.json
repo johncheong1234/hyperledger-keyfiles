@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "8714be53-1e63-4a9b-a742-e43a6c26e9bd",
+		"name": "HL AWS ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Read SGX Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "44.197.32.99:3000/read_sgx",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3000",
+					"path": [
+						"read_sgx"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read Primo Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "44.197.32.99:3000/read_primo",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3000",
+					"path": [
+						"read_primo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload SGX Data",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "myFile",
+							"type": "file",
+							"src": "/C:/Hyperledger/hyperledger-keyfiles/parse-service/New_sgx.xlsx"
+						}
+					]
+				},
+				"url": {
+					"raw": "44.197.32.99:3002/upload_sgx_complex",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3002",
+					"path": [
+						"upload_sgx_complex"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Primo Data",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "myFile",
+							"type": "file",
+							"src": "/C:/Hyperledger/hyperledger-keyfiles/parse-service/New_sgx.xlsx"
+						}
+					]
+				},
+				"url": {
+					"raw": "44.197.32.99:3002/upload_primo_complex",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3002",
+					"path": [
+						"upload_primo_complex"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read Reconcile Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://44.197.32.99:3000/read_reconcile",
+					"protocol": "http",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3000",
+					"path": [
+						"read_reconcile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Reconcile Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://44.197.32.99:3002/create_reconcile_complex",
+					"protocol": "http",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3002",
+					"path": [
+						"create_reconcile_complex"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Reconcile Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://44.197.32.99:3002/update_status_complex",
+					"protocol": "http",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3002",
+					"path": [
+						"update_status_complex"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read Individual SGX Transaction",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://44.197.32.99:3000/one_sgx/1",
+					"protocol": "http",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3000",
+					"path": [
+						"one_sgx",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read Individual Primo Transaction",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://44.197.32.99:3000/one_primo/1",
+					"protocol": "http",
+					"host": [
+						"44",
+						"197",
+						"32",
+						"99"
+					],
+					"port": "3000",
+					"path": [
+						"one_primo",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
