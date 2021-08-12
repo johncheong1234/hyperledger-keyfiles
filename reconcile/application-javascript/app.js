@@ -269,7 +269,7 @@ app.post('/create_sgx', function(request, response){
 		// response.send(value)
 		for(let i=0; i<request.body.length; i++){
 			var id = parseInt(i)+parseInt(value);
-			contract_sgx.submitTransaction('CreateAsset',id.toString(),"Sgx",request.body[i][3],request.body[i][4],request.body[i][5],request.body[i][0],request.body[i][1],request.body[i][2],'pending').then(function(value){
+			contract_sgx.submitTransaction('CreateAsset',id.toString(),"Sgx",request.body[i][3],request.body[i][4],request.body[i][5],request.body[i][0],request.body[i][1],request.body[i][2],'pending','NIL').then(function(value){
 				console.log(request.body[i])
 			}).catch((error) => {
 				console.error(error);
@@ -290,7 +290,7 @@ app.post('/create_primo', function(request, response){
 
 		for(let i=0; i<request.body.length; i++){
 		var id = parseInt(i)+parseInt(value);
-		contract_primo.submitTransaction('CreateAsset',id.toString(),"Primo",request.body[i][10],request.body[i][12],request.body[i][6],request.body[i][5],request.body[i][19],request.body[i][11],'pending').then(function(value){
+		contract_primo.submitTransaction('CreateAsset',id.toString(),"Primo",request.body[i][10],request.body[i][12],request.body[i][6],request.body[i][5],request.body[i][19],request.body[i][11],'pending','NIL').then(function(value){
 			console.log(request.body[i])
 		}).catch((error) => {
 			console.error(error);
@@ -333,6 +333,22 @@ app.post('/update_sgx_status', function(request, response){
 
 });
 
+app.post('/update_sgx_block_id', function(request, response){
+
+	for(let i=0; i<request.body.length; i++){
+	
+		contract_sgx.submitTransaction('UpdateAssetBlockID',request.body[i]['ID'],request.body[i]['Block_ID']).then(function(value){
+			console.log(value.toString())
+		}).catch((error) => {
+			console.error(error);
+		  });
+
+	}
+
+	response.send("SGX Block ID Update Transaction complete")
+
+});
+
 app.post('/update_primo_status', function(request, response){
 
 	for(let i=0; i<request.body.length; i++){
@@ -346,6 +362,22 @@ app.post('/update_primo_status', function(request, response){
 }
 
 response.send("Primo Status Update Transaction complete")
+
+});
+
+app.post('/update_primo_block_id', function(request, response){
+
+	for(let i=0; i<request.body.length; i++){
+	
+	contract_primo.submitTransaction('UpdateAssetBlockID',request.body[i]['ID'],request.body[i]['Block_ID']).then(function(value){
+		console.log(value.toString())
+	}).catch((error) => {
+		console.error(error);
+	  });
+
+}
+
+response.send("Primo Block ID Update Transaction complete")
 
 });
 
@@ -397,6 +429,13 @@ app.get('/reconcile',function(request,response){
 	)
 })
 
+app.get('/reconcile_2',function(request,response){
+	contract_reconcile.submitTransaction("reconcile_2").then(function(value){
+		response.send(value)
+	}	
+	)
+})
+
 app.post('/create_reconcile',function(request,response){
 	contract_reconcile.evaluateTransaction('GetLength').then(function(value){
 	for(let i=0; i<request.body.length; i++){
@@ -420,6 +459,7 @@ app.get('/read_reconcile', (req, res) => {
 		res.send(all)
 	})
 })
+
 
 
 app.listen(port, () => {

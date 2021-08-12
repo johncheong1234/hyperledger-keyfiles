@@ -256,7 +256,7 @@ app.get('/update_status_complex',(req,res)=>{
 })
 
 app.get('/create_reconcile_complex',function(request,response){
-	axios.get('http://localhost:3000/reconcile').then(resp=>{
+	axios.get('http://localhost:3000/reconcile_2').then(resp=>{
 
     const block_trades = []
 
@@ -294,40 +294,64 @@ app.get('/create_reconcile_complex',function(request,response){
   })
 })
 
-// app.get('/upload_sgx',(req,res)=>{
+app.get('/transform_reconcile', (req,res)=>{
+  axios.get('http://localhost:3000/read_reconcile').then(resp=>{
+    const value = resp['data']
+    var sgx_list = []
+		var primo_list = []
 
-//     axios.get('http://localhost:3002/parse_sgx').then(resp => {
+		for(const item of value){
 
-//     console.log(resp.data);
+			const sgx_ID_list = item['Record']['sgx_list'].split(',')
 
-//     var sgx_data = resp.data
+			for(const id_q_string of sgx_ID_list){
 
-//     axios.post('http://localhost:3000/create_sgx', sgx_data)
-//       .then(function (response) {
-//         console.log(response);
-//         res.send(response.data)
-//       })
-// });
-   
-// })
+				const sgx_dict = {}
 
-// app.get('/upload_primo',(req,res)=>{
+        const id_q = id_q_string.split('_')
 
-//     axios.get('http://localhost:3002/parse_primo').then(resp => {
+				sgx_dict['Block_ID'] = item['Record']['Block_ID']
 
-//     console.log(resp.data);
+				sgx_dict['ID'] = id_q[0]
 
-//     var sgx_data = resp.data
+				console.log(sgx_dict)
+				sgx_list.push(sgx_dict)
+			}
+		}
 
-//     axios.post('http://localhost:3000/create_primo', sgx_data)
-//       .then(function (response) {
-//         console.log(response);
-//         res.send(response.data)
-//       })
-// });
-   
-// })
+		for(const item of value){
 
+			const primo_ID_list = item['Record']['Primo_list'].split(',')
+
+			for(const id_q_string of primo_ID_list){
+
+				const primo_dict = {}
+
+        const id_q = id_q_string.split('_')
+
+				primo_dict['Block_ID'] = item['Record']['Block_ID']
+
+				primo_dict['ID'] = id_q[0]
+
+				console.log(primo_dict)
+				primo_list.push(primo_dict)
+			}
+		}
+
+		res.send({sgx_list: sgx_list, primo_list: primo_list})
+  })
+})
+
+app.get('/update_block_id_complex',(req,res)=>{
+  axios.get('http://localhost:3002/transform_reconcile').then(resp=>{
+
+    axios.post('http://localhost:3000/update_sgx_block_id',resp.data['sgx_list']).then(
+      axios.post('http://localhost:3000/update_primo_block_id',resp.data['primo_list']).then(
+        res.send('Block_IDs updated')
+      )
+    )
+  })
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)

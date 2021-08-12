@@ -23,7 +23,7 @@ class Primo extends Contract {
     }
 
     // CreateAsset issues a new asset to the world state with given details.
-    async CreateAsset(ctx, id, owner, quantity, execution_date, ISIN, rt, clino, settlement_price,status) {
+    async CreateAsset(ctx, id, owner, quantity, execution_date, ISIN, rt, clino, settlement_price,status,block_id) {
         const exists = await this.AssetExists(ctx, id);
         if (exists) {
             throw new Error(`The asset ${id} already exists`);
@@ -39,6 +39,7 @@ class Primo extends Contract {
             CLINO: clino,
             Settlement_price: settlement_price,
             Status: status,
+            Block_ID: block_id
         };
         
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
@@ -82,6 +83,15 @@ class Primo extends Contract {
         const assetString = await this.ReadAsset(ctx, id);
         const asset = JSON.parse(assetString);
         asset.Status = status;
+        return ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
+
+    }
+
+    async UpdateAssetBlockID(ctx, id, block_id) {
+
+        const assetString = await this.ReadAsset(ctx, id);
+        const asset = JSON.parse(assetString);
+        asset.Block_ID = block_id;
         return ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
 
     }

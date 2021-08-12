@@ -23,7 +23,7 @@ class Sgx extends Contract {
     }
 
     // CreateAsset issues a new asset to the world state with given details.
-    async CreateAsset(ctx, id, owner, quantity, execution_date, ISIN, rt, clino, settlement_price, status) {
+    async CreateAsset(ctx, id, owner, quantity, execution_date, ISIN, rt, clino, settlement_price, status, block_id) {
         const exists = await this.AssetExists(ctx, id);
         if (exists) {
             throw new Error(`The asset ${id} already exists`);
@@ -38,7 +38,8 @@ class Sgx extends Contract {
             RT: rt,
             CLINO: clino,
             Settlement_price: settlement_price,
-            Status: status
+            Status: status,
+            Block_ID: block_id
         };
         
         await ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
@@ -86,6 +87,14 @@ class Sgx extends Contract {
         return ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
     }
 
+    async UpdateAssetBlockID(ctx, id, block_id) {
+
+        const assetString = await this.ReadAsset(ctx, id);
+        const asset = JSON.parse(assetString);
+        asset.Block_ID = block_id;
+        return ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
+
+    }
 
     // DeleteAsset deletes an given asset from the world state.
     async DeleteAsset(ctx, id) {
@@ -151,32 +160,6 @@ class Sgx extends Contract {
         return allResults.length;
     }
 
-    // async reconcile(ctx) {
-    //     const sgx = [];
-    //     const primo = []
-    //     // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
-    //     const iterator = await ctx.stub.getStateByRange('', '');
-    //     let result = await iterator.next();
-    //     while (!result.done) {
-    //         const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
-    //         let record;
-    //         try {
-    //             record = JSON.parse(strValue);
-    //         } catch (err) {
-    //             console.log(err);
-    //             record = strValue;
-    //         }
-
-    //         if (record.Owner == "sgx"){
-    //             sgx.push({ Key: result.value.key, Record: record });
-    //         }else if (record.Owner == "primo"){
-    //             primo.push({ Key: result.value.key, Record: record });
-    //         }
-
-    //         result = await iterator.next();
-    //     }
-    //     return "Length of SGX is "+sgx.length+". Length of Primo is "+primo.length;
-    // }
 }
 
 module.exports = Sgx;

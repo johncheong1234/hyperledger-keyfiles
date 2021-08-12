@@ -282,31 +282,142 @@ class Reconcile extends Contract {
         return assetJSON.toString();
     }
 
-    async reconcile(ctx) {
-        const sgx = [];
-        const primo = []
-        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
-        const iterator = await ctx.stub.getStateByRange('', '');
-        let result = await iterator.next();
-        while (!result.done) {
-            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
-            let record;
-            try {
-                record = JSON.parse(strValue);
-            } catch (err) {
-                console.log(err);
-                record = strValue;
-            }
-
-            if (record.Owner == "Sgx"){
-                sgx.push({ Key: result.value.key, Record: record });
-            }else if (record.Owner == "Primo"){
-                primo.push({ Key: result.value.key, Record: record });
-            }
-
-            result = await iterator.next();
+    async reconcile_2(ctx) {
+        let sgx = await ctx.stub.invokeChaincode("sgx", ["GetAllAssets"], "mychannel");
+        if (sgx.status !== 200) {
+            throw new Error(sgx.message);
         }
-        return "Length of SGX is "+sgx.length+". Length of Primo is "+primo.length;
+
+        let primo = await ctx.stub.invokeChaincode("primo", ["GetAllAssets"], "mychannel");
+        if (primo.status !== 200) {
+            throw new Error(primo.message);
+        }
+
+        // const allassets = sgx.concat(primo)
+
+        const sgx_assets = JSON.parse(sgx.payload.toString('utf8'));
+        const primo_assets = JSON.parse(primo.payload.toString('utf8'));
+        const parsed_primo_assets = []
+        const parsed_sgx_assets = []
+
+        for(var i=0;i<sgx_assets.length;i++){
+            if(sgx_assets[i]['Record']['Status']=='pending'){
+                parsed_sgx_assets.push(sgx_assets[i])
+            }
+        }
+
+        const ISIN = []
+
+        for(var i=0; i<parsed_sgx_assets.length; i++){
+            if(!ISIN.includes(parsed_sgx_assets[i]['Record']['ISIN'])){
+                ISIN.push(parsed_sgx_assets[i]['Record']['ISIN'])
+            }
+        }
+
+        var includes = false;
+
+        for(var j=0; j<primo_assets.length; j++){
+            if(primo_assets[j]['Record']['Status']=='pending'){
+            for(var i=0; i<ISIN.length; i++){
+                if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
+                includes = true;
+                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+                break
+                }
+                
+            }
+
+            if(includes == true){
+                includes = false;
+            }else{
+                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+            }
+        
+        }
+        }
+
+        const sgx_dict = {}
+        const primo_dict = {}
+
+        for(var i=0; i<parsed_sgx_assets.length; i++){
+            var elements = [parsed_sgx_assets[i]['Record']['ISIN'],parsed_sgx_assets[i]['Record']['RT'],parsed_sgx_assets[i]['Record']['CLINO'],parsed_sgx_assets[i]['Record']['Settlement_price'],parsed_sgx_assets[i]['Record']['Execution_date']]
+            var sgx_string = elements.join('_');
+            var elements_id_q = [parsed_sgx_assets[i]['Record']['ID'],parsed_sgx_assets[i]['Record']['Quantity']]
+            var id_q_string = elements_id_q.join('_')
+            if(sgx_dict[sgx_string]){
+                sgx_dict[sgx_string]['Quantity'] += parseInt(parsed_sgx_assets[i]['Record']['Quantity']);
+                sgx_dict[sgx_string]['ID_list'].push(id_q_string)
+            }else{
+                sgx_dict[sgx_string] = {'Quantity':parseInt(parsed_sgx_assets[i]['Record']['Quantity']), 'ID_list':[id_q_string]};
+            }
+        }
+
+        for(var i=0; i<parsed_primo_assets.length; i++){
+            var elements = [parsed_primo_assets[i]['ISIN'],parsed_primo_assets[i]['RT'],parsed_primo_assets[i]['CLINO'],parsed_primo_assets[i]['Settlement_price'],parsed_primo_assets[i]['Execution_date']]
+            var primo_string = elements.join('_');
+            var elements_id_q = [parsed_primo_assets[i]['ID'],parsed_primo_assets[i]['Quantity']]
+            var id_q_string = elements_id_q.join('_')
+            if(primo_dict[primo_string]){
+                primo_dict[primo_string]['Quantity'] += parseInt(parsed_primo_assets[i]['Quantity']);
+                primo_dict[primo_string]['ID_list'].push(id_q_string)
+            }else{
+                primo_dict[primo_string] = {'Quantity':parseInt(parsed_primo_assets[i]['Quantity']), 'ID_list':[id_q_string]};
+            }
+        }
+
+        const failed_sgx = []
+        const failed_primo = []
+        const reconciled_sgx = []
+        const reconciled_primo = []
+
+        for (const trade in sgx_dict) {
+            
+            if(!(trade in primo_dict)){
+
+                var empty_dict = {}
+                empty_dict[trade] = JSON.stringify(sgx_dict[trade])
+                failed_sgx.push(empty_dict)
+                continue
+            }
+            
+            if(trade in primo_dict && primo_dict[trade]['Quantity']!=sgx_dict[trade]['Quantity']){
+            
+                var empty_dict = {}
+                empty_dict[trade] = JSON.stringify(sgx_dict[trade])
+                failed_sgx.push(empty_dict)
+                continue
+            }
+
+            var empty_dict = {}
+            empty_dict[trade] = JSON.stringify(sgx_dict[trade])
+            reconciled_sgx.push(empty_dict)
+          }
+
+
+        for (const trade in primo_dict) {
+            
+            if(!(trade in sgx_dict)){
+
+                var empty_dict = {}
+                empty_dict[trade] = JSON.stringify(primo_dict[trade])
+                failed_primo.push(empty_dict)
+                continue
+            }
+            
+            if(trade in sgx_dict && sgx_dict[trade]['Quantity']!=primo_dict[trade]['Quantity']){
+            
+                var empty_dict = {}
+                empty_dict[trade] = JSON.stringify(primo_dict[trade])
+                failed_primo.push(empty_dict)
+                continue
+            }
+
+            var empty_dict = {}
+            empty_dict[trade] = JSON.stringify(primo_dict[trade])
+            reconciled_primo.push(empty_dict)
+          }
+
+        return {'failed_sgx':failed_sgx,'failed_primo': failed_primo,'reconciled_sgx':reconciled_sgx, 'reconciled_primo':reconciled_primo};
     }
 }
 
