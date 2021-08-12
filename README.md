@@ -36,6 +36,7 @@ nodemon app.js
 5) http://localhost:3002/update_status_complex (GET REQUEST For modifying the reconciliation status of SGX and Primo rows on the blockchain - MUST BE CALLED AFTER 7 because after modification of status, reconcile end point not listed here will not work, causing 7 to fail)
 6) http://localhost:3000/read_reconcile (GET REQUEST For reading Reconcile blocks on blockchain)
 7) http://localhost:3002/create_reconcile_complex (GET REQUEST For uploading Reconcile blocks onto blockchain - MUST BE CALLED BEFORE 5 because after modification of status, reconcile end point not listed here will not work, causing 7 to fail)
+8) http://localhost:3002/update_block_id_complex (GET REQUEST For modifiying the Block ID of each SGX and Primo row on the blockchain - MUST BE CALLED after 7 as this requires the updated set of blocks)
 8) http://localhost:3000/one_sgx/:asset (GET REQUEST For retrieving single SGX transaction by ID)
 9) http://localhost:3000/one_primo/:asset (GET REQUEST For retrieving single Primo transaction by ID)
 10) http://localhost:3000/one_reconcile/:asset (GET REQUEST For retrieving single Reconcile transaction by ID)
