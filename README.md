@@ -40,3 +40,4 @@ nodemon app.js
 8) http://localhost:3000/one_sgx/:asset (GET REQUEST For retrieving single SGX transaction by ID)
 9) http://localhost:3000/one_primo/:asset (GET REQUEST For retrieving single Primo transaction by ID)
 10) http://localhost:3000/one_reconcile/:asset (GET REQUEST For retrieving single Reconcile transaction by ID)
+11) http://localhost:3002/reconcile_orchestrate (GET REQUEST that orchestrates 5,7,8)

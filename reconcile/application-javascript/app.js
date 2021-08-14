@@ -290,7 +290,7 @@ app.post('/create_primo', function(request, response){
 
 		for(let i=0; i<request.body.length; i++){
 		var id = parseInt(i)+parseInt(value);
-		contract_primo.submitTransaction('CreateAsset',id.toString(),"Primo",request.body[i][10],request.body[i][12],request.body[i][6],request.body[i][5],request.body[i][19],request.body[i][11],'pending','NIL').then(function(value){
+		contract_primo.submitTransaction('CreateAsset',id.toString(),"Primo",request.body[i][10],request.body[i][12],request.body[i][6],request.body[i][5],request.body[i][19],request.body[i][11],'pending','NIL',request.body[i][0],request.body[i][1],request.body[i][2],request.body[i][3],request.body[i][4],request.body[i][7],request.body[i][8],request.body[i][9],request.body[i][13],request.body[i][14],request.body[i][15],request.body[i][16],request.body[i][17],request.body[i][18]).then(function(value){
 			console.log(request.body[i])
 		}).catch((error) => {
 			console.error(error);

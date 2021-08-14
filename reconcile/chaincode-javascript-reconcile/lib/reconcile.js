@@ -321,7 +321,7 @@ class Reconcile extends Contract {
             for(var i=0; i<ISIN.length; i++){
                 if(primo_assets[j]['Record']['ISIN'].includes(ISIN[i])){
                 includes = true;
-                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+                parsed_primo_assets.push({Order_Slang: primo_assets[j]['Record']['Order_Slang'],Order_ID: primo_assets[j]['Record']['Order_ID'],Principal:primo_assets[j]['Record']['Principal'],Pricing_Currency: primo_assets[j]['Record']['Pricing_Currency'],Alpha_status: primo_assets[j]['Record']['Alpha_status'],Settlement_Date: primo_assets[j]['Record']['Settlement_Date'],Counterparty: primo_assets[j]['Record']['Counterparty'],Book: primo_assets[j]['Record']['Book'], FII: primo_assets[j]['Record']['FII'],Source_System: primo_assets[j]['Record']['Source_System'],Source_System_ID: primo_assets[j]['Record']['Source_System_ID'],Trade_Version_ID: primo_assets[j]['Record']['Trade_Version_ID'],Request_Ty: primo_assets[j]['Record']['Request_Ty'],Trade_ID:primo_assets[j]['Record']['Trade_ID'],'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':ISIN[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
                 break
                 }
                 
@@ -330,7 +330,7 @@ class Reconcile extends Contract {
             if(includes == true){
                 includes = false;
             }else{
-                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+                parsed_primo_assets.push({Order_Slang: primo_assets[j]['Record']['Order_Slang'],Order_ID: primo_assets[j]['Record']['Order_ID'],Principal:primo_assets[j]['Record']['Principal'],Pricing_Currency: primo_assets[j]['Record']['Pricing_Currency'],Alpha_status: primo_assets[j]['Record']['Alpha_status'],Settlement_Date: primo_assets[j]['Record']['Settlement_Date'],Counterparty: primo_assets[j]['Record']['Counterparty'],Book: primo_assets[j]['Record']['Book'], FII: primo_assets[j]['Record']['FII'], Source_System: primo_assets[j]['Record']['Source_System'],Source_System_ID: primo_assets[j]['Record']['Source_System_ID'],Trade_Version_ID: primo_assets[j]['Record']['Trade_Version_ID'], Request_Ty: primo_assets[j]['Record']['Request_Ty'], Trade_ID: primo_assets[j]['Record']['Trade_ID'],'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_date':primo_assets[j]['Record']['Execution_date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
             }
         
         }
@@ -355,7 +355,7 @@ class Reconcile extends Contract {
         for(var i=0; i<parsed_primo_assets.length; i++){
             var elements = [parsed_primo_assets[i]['ISIN'],parsed_primo_assets[i]['RT'],parsed_primo_assets[i]['CLINO'],parsed_primo_assets[i]['Settlement_price'],parsed_primo_assets[i]['Execution_date']]
             var primo_string = elements.join('_');
-            var elements_id_q = [parsed_primo_assets[i]['ID'],parsed_primo_assets[i]['Quantity']]
+            var elements_id_q = [parsed_primo_assets[i]['ID'],parsed_primo_assets[i]['Quantity'],parsed_primo_assets[i]['Request_Ty'],parsed_primo_assets[i]['Trade_ID'],parsed_primo_assets[i]['Trade_Version_ID'],parsed_primo_assets[i]['Source_System_ID'],parsed_primo_assets[i]['Source_System'],parsed_primo_assets[i]['FII'],parsed_primo_assets[i]['Book'],parsed_primo_assets[i]['Counterparty'],parsed_primo_assets[i]['Settlement_Date'],parsed_primo_assets[i]['Alpha_status'],parsed_primo_assets[i]['Pricing_Currency'],parsed_primo_assets[i]['Principal'],parsed_primo_assets[i]['Order_ID'],parsed_primo_assets[i]['Order_Slang']]
             var id_q_string = elements_id_q.join('_')
             if(primo_dict[primo_string]){
                 primo_dict[primo_string]['Quantity'] += parseInt(parsed_primo_assets[i]['Quantity']);

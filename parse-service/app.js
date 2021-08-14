@@ -230,28 +230,7 @@ app.get('/update_status_complex',(req,res)=>{
               
     
     res.send('Status of all trades updated') 
-    // var test;
-    // var object = resp.data['failed_sgx'][0]
-    // for (const property in object) {
-    //   test = JSON.parse(object[property]);
-    // }
-    
-    // res.send(test);
-
-    // var result = resp.data
-    // var parsed_reconcile_result = {}
-
-    // for(const property in result){
-    //   parsed_reconcile_result[property] = []
-    //   for (const k in result[property]){
-    //     // var j = JSON.parse(result[property][k])
-    //     console.log(result[property][k])
-    //     var dict_to_push = {}
-    //     dict_to_push[k] = result[property][k]
-    //     parsed_reconcile_result[property].push(dict_to_push)
-    //   }
-    // }
-
+  
   })
 })
 
@@ -351,6 +330,27 @@ app.get('/update_block_id_complex',(req,res)=>{
       )
     )
   })
+})
+
+app.get('/reconcile_orchestrate',(req,res)=>{
+  console.log("Creating reconcile blocks ...")
+  axios.get('http://localhost:3002/create_reconcile_complex')
+    .then(function (response) {
+      console.log(response.data);
+      
+      console.log("Updating reconcile status ...")
+      axios.get('http://localhost:3002/update_status_complex')
+        .then(function (response) {
+          console.log(response.data);
+          
+          console.log("Updating Block ID for each individual transaction")
+          axios.get('http://localhost:3002/update_block_id_complex').then(
+            function(response){
+              console.log(response.data)
+            }
+          )
+    })
+    })
 })
 
 app.listen(port, () => {
