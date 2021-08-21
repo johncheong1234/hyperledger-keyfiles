@@ -253,8 +253,8 @@ app.get('/one_reconcile/:asset',(req,res)=>{
 	
 })
 
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
+app.use(express.json({limit: '200mb'}));
+app.use(express.urlencoded({limit: '200mb'}));
 
 app.post('/test', function(request, response){
 	console.log(request.body);      // your JSON
@@ -262,9 +262,9 @@ app.post('/test', function(request, response){
 	 response.send(request.body);    // echo the result back
 });
 
-app.post('/create_sgx', function(request, response){
+app.post('/create_sgx', async(request, response)=>{
 
-	contract_sgx.evaluateTransaction('GetLength').then(function(value){
+	await contract_sgx.evaluateTransaction('GetLength').then(async(value)=>{
 		// var number = parseInt(value.toString())
 		// response.send(value)
 		for(let i=0; i<request.body.length; i++){
@@ -284,9 +284,55 @@ app.post('/create_sgx', function(request, response){
 
 });
 
-app.post('/create_primo', function(request, response){
+app.post('/create_sgx_array', async(request, response)=>{
+
+	await contract_sgx.evaluateTransaction('GetLength').then(async(value)=>{
+		// var number = parseInt(value.toString())
+		// response.send(value)
+		for(let i=0; i<request.body.length; i++){
+			var id = parseInt(i)+parseInt(value);
+			request.body[i]['ID'] = id;
+		}
+
+	})
+
+	contract_sgx.submitTransaction('CreateAssetArray',JSON.stringify(request.body)).then(function(value){
+		console.log(value.toString())
+		response.send(value.toString())
+	}).catch((error) => {
+		console.error(error);
+	  });
 	
-	contract_primo.evaluateTransaction('GetLength').then(function(value){
+	// response.send(request.body)
+
+});
+
+app.post('/create_primo_array', async(request, response)=>{
+
+	await contract_primo.evaluateTransaction('GetLength').then(async(value)=>{
+		// var number = parseInt(value.toString())
+		// response.send(value)
+		for(let i=0; i<request.body.length; i++){
+			var id = parseInt(i)+parseInt(value);
+			request.body[i]['ID'] = id;
+		}
+
+	})
+
+	contract_primo.submitTransaction('CreateAssetArray',JSON.stringify(request.body)).then(function(value){
+		console.log(value.toString())
+		response.send(value.toString())
+	}).catch((error) => {
+		console.error(error);
+	  });
+	
+	// response.send(request.body)
+
+});
+
+app.post('/create_primo', async(request, response)=>{
+	
+	await contract_primo.evaluateTransaction('GetLength').then(async(value)=>{
 
 		for(let i=0; i<request.body.length; i++){
 		var id = parseInt(i)+parseInt(value);
@@ -317,27 +363,80 @@ app.post('/update_sgx', function(request, response){
 	response.send("SGX Update Transaction complete")
 });
 
-app.post('/update_sgx_status', function(request, response){
+// app.post('/update_sgx_status', function(request, response){
 
-	for(let i=0; i<request.body.length; i++){
+// 	for(let i=0; i<request.body.length; i++){
 	
-		contract_sgx.submitTransaction('UpdateAssetStatus',request.body[i]['ID'],request.body[i]['Status']).then(function(value){
-			console.log(value.toString())
-		}).catch((error) => {
-			console.error(error);
-		  });
+// 		contract_sgx.submitTransaction('UpdateAssetStatus',request.body[i]['ID'],request.body[i]['Status']).then(function(value){
+// 			console.log(value.toString())
+// 		}).catch((error) => {
+// 			console.error(error);
+// 		  });
 
-	}
+// 	}
 
-	response.send("SGX Status Update Transaction complete")
+// 	response.send("SGX Status Update Transaction complete")
+
+// });
+
+app.post('/update_sgx_status_array', async(request, response)=>{
+
+
+	await contract_sgx.submitTransaction('UpdateAssetStatusArray',JSON.stringify(request.body)).then(function(value){
+				console.log(value.toString())
+			}).catch((error) => {
+				console.error(error);
+			  });
+
+	response.send(JSON.stringify(request.body))
 
 });
 
-app.post('/update_sgx_block_id', function(request, response){
+app.post('/update_sgx_block_id_array', async(request, response)=>{
+
+
+	await contract_sgx.submitTransaction('UpdateAssetBlockIDArray',JSON.stringify(request.body)).then(function(value){
+				console.log(value.toString())
+			}).catch((error) => {
+				console.error(error);
+			  });
+
+	response.send(JSON.stringify(request.body))
+
+});
+
+app.post('/update_primo_status_array', async(request, response)=>{
+
+
+	await contract_primo.submitTransaction('UpdateAssetStatusArray',JSON.stringify(request.body)).then(function(value){
+				console.log(value.toString())
+			}).catch((error) => {
+				console.error(error);
+			  });
+
+	response.send(JSON.stringify(request.body))
+
+});
+
+
+app.post('/update_primo_block_id_array', async(request, response)=>{
+
+
+	await contract_primo.submitTransaction('UpdateAssetBlockIDArray',JSON.stringify(request.body)).then(function(value){
+				console.log(value.toString())
+			}).catch((error) => {
+				console.error(error);
+			  });
+
+	response.send(JSON.stringify(request.body))
+
+});
+
+app.post('/update_sgx_block_id', async(request, response)=>{
 
 	for(let i=0; i<request.body.length; i++){
 	
-		contract_sgx.submitTransaction('UpdateAssetBlockID',request.body[i]['ID'],request.body[i]['Block_ID']).then(function(value){
+		await contract_sgx.submitTransaction('UpdateAssetBlockID',request.body[i]['ID'],request.body[i]['Block_ID']).then(function(value){
 			console.log(value.toString())
 		}).catch((error) => {
 			console.error(error);
@@ -349,27 +448,27 @@ app.post('/update_sgx_block_id', function(request, response){
 
 });
 
-app.post('/update_primo_status', function(request, response){
+// app.post('/update_primo_status', function(request, response){
+
+// 	for(let i=0; i<request.body.length; i++){
+	
+// 	contract_primo.submitTransaction('UpdateAssetStatus',request.body[i]['ID'],request.body[i]['Status']).then(function(value){
+// 		console.log(value.toString())
+// 	}).catch((error) => {
+// 		console.error(error);
+// 	  });
+
+// }
+
+// response.send("Primo Status Update Transaction complete")
+
+// });
+
+app.post('/update_primo_block_id', async(request, response)=>{
 
 	for(let i=0; i<request.body.length; i++){
 	
-	contract_primo.submitTransaction('UpdateAssetStatus',request.body[i]['ID'],request.body[i]['Status']).then(function(value){
-		console.log(value.toString())
-	}).catch((error) => {
-		console.error(error);
-	  });
-
-}
-
-response.send("Primo Status Update Transaction complete")
-
-});
-
-app.post('/update_primo_block_id', function(request, response){
-
-	for(let i=0; i<request.body.length; i++){
-	
-	contract_primo.submitTransaction('UpdateAssetBlockID',request.body[i]['ID'],request.body[i]['Block_ID']).then(function(value){
+	await contract_primo.submitTransaction('UpdateAssetBlockID',request.body[i]['ID'],request.body[i]['Block_ID']).then(function(value){
 		console.log(value.toString())
 	}).catch((error) => {
 		console.error(error);
@@ -447,8 +546,9 @@ app.post('/create_reconcile',function(request,response){
 	  });
 	
 	}
-	})
 	response.send('Reconcile blocks made')
+	})
+	
 })
 
 app.get('/read_reconcile', (req, res) => {

@@ -46,6 +46,36 @@ class Sgx extends Contract {
         return JSON.stringify(asset);
     }
 
+    async CreateAssetArray(ctx, array){
+        const assets = JSON.parse(array);
+
+        for(var i=0;i<assets.length;i++){
+            const exists = await this.AssetExists(ctx, assets[i]['ID'].toString());
+            if (exists) {
+                throw new Error(`The asset ${assets[i]['ID']} already exists`);
+            }
+
+            const asset = {
+                ID: assets[i]['ID'],
+                Owner: assets[i]['Owner'],
+                Quantity: assets[i]['Quantity'],
+                Execution_date: assets[i]['Execution_date'],
+                ISIN: assets[i]['ISIN'],
+                RT: assets[i]['RT'],
+                CLINO: assets[i]['CLINO'],
+                Settlement_price: assets[i]['Settlement_price'],
+                Status: assets[i]['Status'],
+                Block_ID: assets[i]['Block_ID']
+            };
+            
+            await ctx.stub.putState(assets[i]['ID'].toString(), Buffer.from(JSON.stringify(asset)));
+        }
+
+        return 'Assets Created'
+
+    }
+
+
     // ReadAsset returns the asset stored in the world state with given id.
     async ReadAsset(ctx, id) {
         const assetJSON = await ctx.stub.getState(id); // get the asset from chaincode state
@@ -86,6 +116,34 @@ class Sgx extends Contract {
         asset.Status = status;
         return ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
     }
+
+    async UpdateAssetStatusArray(ctx, array){
+        const assets = JSON.parse(array);
+
+        for(var i=0;i<assets.length;i++){
+            const assetString = await this.ReadAsset(ctx, assets[i]['ID'].toString());
+            const asset = JSON.parse(assetString);
+            asset.Status = assets[i]['Status'];
+            await ctx.stub.putState(assets[i]['ID'].toString(), Buffer.from(JSON.stringify(asset)));
+        }
+
+        return 'Assets Status Updated'
+
+    }
+
+    async UpdateAssetBlockIDArray(ctx, array){
+        const assets = JSON.parse(array);
+
+        for(var i=0;i<assets.length;i++){
+            const assetString = await this.ReadAsset(ctx, assets[i]['ID'].toString());
+            const asset = JSON.parse(assetString);
+            asset.Block_ID = assets[i]['Block_ID'];
+            await ctx.stub.putState(assets[i]['ID'].toString(), Buffer.from(JSON.stringify(asset)));
+        }
+
+        return 'Block IDs Updated'
+
+    }   
 
     async UpdateAssetBlockID(ctx, id, block_id) {
 

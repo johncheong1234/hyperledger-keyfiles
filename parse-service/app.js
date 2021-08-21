@@ -11,6 +11,9 @@ var xlsx = require('node-xlsx').default;
 const axios = require('axios')
 
 app.use(fileUpload());
+app.use(express.json({limit: '200mb'}));
+// app.use(express.urlencoded({limit: '200mb'}));
+app.use(express.urlencoded({ extended: false, limit: '2gb' }));
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -91,6 +94,119 @@ app.post('/upload_sgx_complex',(req,res)=>{
   });
 })
 
+app.post('/upload_sgx_dict_complex',(req,res)=>{
+
+  let sgx;
+  let uploadPath;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  uploadPath = __dirname + '/' + 'sgx.xlsx';
+  sgx = req.files.myFile;
+
+  
+  sgx.mv(uploadPath, function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    // res.send('File uploaded!');
+    axios.get('http://localhost:3002/parse_sgx').then(resp => {
+
+      console.log(resp.data);
+  
+      var sgx_data = resp.data
+  
+      var sgx_dict_data = []
+
+      for(var i=0;i<sgx_data.length;i++){
+        var sgx_dict = {}
+        sgx_dict['RT'] = sgx_data[i][0]
+        sgx_dict['CLINO'] = sgx_data[i][1]
+        sgx_dict['Settlement_price'] = sgx_data[i][2]
+        sgx_dict['Quantity'] = sgx_data[i][3]
+        sgx_dict['Execution_date'] = sgx_data[i][4]
+        sgx_dict['ISIN'] = sgx_data[i][5]
+        sgx_dict['Owner'] = 'SGX'
+        sgx_dict['Status'] = 'pending'
+        sgx_dict['Block_ID'] = 'NIL'
+        sgx_dict_data.push(sgx_dict)
+      }
+
+      axios.post('http://localhost:3000/create_sgx_array', sgx_dict_data)
+        .then(function (response) {
+          console.log(response);
+          res.send(response.data)
+        })
+  });
+  });
+})
+
+app.post('/upload_primo_dict_complex',(req,res)=>{
+
+  let sgx;
+  let uploadPath;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  uploadPath = __dirname + '/' + 'primo.xlsx';
+  primo = req.files.myFile;
+
+  
+  primo.mv(uploadPath, function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    // res.send('File uploaded!');
+    axios.get('http://localhost:3002/parse_primo').then(resp => {
+
+      console.log(resp.data);
+  
+      var primo_data = resp.data
+  
+      var primo_dict_data = []
+
+      for(var i=0;i<primo_data.length;i++){
+        var primo_dict = {}
+        primo_dict['Request_Ty'] = primo_data[i][0]
+        primo_dict['Trade_ID'] = primo_data[i][1]
+        primo_dict['Trade_Version_ID'] = primo_data[i][2]
+        primo_dict['Source_System_ID'] = primo_data[i][3]
+        primo_dict['Source_System'] = primo_data[i][4]
+        primo_dict['RT'] = primo_data[i][5]
+        primo_dict['ISIN'] = primo_data[i][6]
+        primo_dict['FII'] = primo_data[i][7]
+        primo_dict['Book'] = primo_data[i][8]
+        primo_dict['Counterparty'] = primo_data[i][9]
+        primo_dict['Quantity'] = primo_data[i][10]
+        primo_dict['Settlement_price'] = primo_data[i][11]
+        primo_dict['Execution_date'] = primo_data[i][12]
+        primo_dict['Settlement_Date'] = primo_data[i][13]
+        primo_dict['Alpha_status'] = primo_data[i][14]
+        primo_dict['Pricing_Currency'] = primo_data[i][15]
+        primo_dict['Principal'] = primo_data[i][16]
+        primo_dict['Order_ID'] = primo_data[i][17]
+        primo_dict['Order_Slang'] = primo_data[i][18]
+        primo_dict['CLINO'] = primo_data[i][19]
+        primo_dict['Owner'] = 'Primo'
+        primo_dict['Status'] = 'pending'
+        primo_dict['Block_ID'] = 'NIL'
+        primo_dict_data.push(primo_dict)
+      }
+
+      axios.post('http://localhost:3000/create_primo_array', primo_dict_data)
+        .then(function (response) {
+          console.log(response);
+          res.send(response.data)
+        })
+
+  });
+  });
+})
+
 app.post('/upload_primo_complex',(req,res)=>{
 
   let primo;
@@ -124,7 +240,7 @@ app.post('/upload_primo_complex',(req,res)=>{
 })
 
 app.get('/update_status_complex',(req,res)=>{
-  axios.get('http://localhost:3000/reconcile').then(resp=>{
+  axios.get('http://localhost:3000/reconcile').then(async(resp)=>{
 
     const failed_sgx = resp.data['failed_sgx']
     const failed_primo = resp.data['failed_primo']
@@ -154,7 +270,7 @@ app.get('/update_status_complex',(req,res)=>{
       }
     }
 
-    axios.post('http://localhost:3000/update_sgx_status', failed_sgx_batch)
+    await axios.post('http://localhost:3000/update_sgx_status_array', failed_sgx_batch)
               .then(function (response) {
                 console.log(response);
               })
@@ -177,7 +293,7 @@ app.get('/update_status_complex',(req,res)=>{
       }
     }
 
-    axios.post('http://localhost:3000/update_primo_status', failed_primo_batch)
+    await axios.post('http://localhost:3000/update_primo_status_array', failed_primo_batch)
               .then(function (response) {
                 console.log(response);
               })
@@ -200,7 +316,7 @@ app.get('/update_status_complex',(req,res)=>{
       }
     }
 
-    axios.post('http://localhost:3000/update_sgx_status', success_sgx_batch)
+    await axios.post('http://localhost:3000/update_sgx_status_array', success_sgx_batch)
               .then(function (response) {
                 console.log(response);
               })
@@ -223,7 +339,7 @@ app.get('/update_status_complex',(req,res)=>{
       }
     }
 
-    axios.post('http://localhost:3000/update_primo_status', success_primo_batch)
+    await axios.post('http://localhost:3000/update_primo_status_array', success_primo_batch)
               .then(function (response) {
                 console.log(response);
               })
@@ -235,7 +351,7 @@ app.get('/update_status_complex',(req,res)=>{
 })
 
 app.get('/create_reconcile_complex',function(request,response){
-	axios.get('http://localhost:3000/reconcile_2').then(resp=>{
+	axios.get('http://localhost:3000/reconcile_2').then(async(resp)=>{
 
     const block_trades = []
 
@@ -263,7 +379,7 @@ app.get('/create_reconcile_complex',function(request,response){
       }
     }
 
-    axios.post('http://localhost:3000/create_reconcile', block_trades)
+    await axios.post('http://localhost:3000/create_reconcile', block_trades)
         .then(function (resp) {
           console.log(resp);
           response.send(resp.data)
@@ -321,36 +437,40 @@ app.get('/transform_reconcile', (req,res)=>{
   })
 })
 
-app.get('/update_block_id_complex',(req,res)=>{
-  axios.get('http://localhost:3002/transform_reconcile').then(resp=>{
+app.get('/update_block_id_complex',async(req,res)=>{
+  await axios.get('http://localhost:3002/transform_reconcile').then(async(resp)=>{
 
-    axios.post('http://localhost:3000/update_sgx_block_id',resp.data['sgx_list']).then(
-      axios.post('http://localhost:3000/update_primo_block_id',resp.data['primo_list']).then(
+    await axios.post('http://localhost:3000/update_sgx_block_id_array',resp.data['sgx_list']).then(async(response)=>{
+      await axios.post('http://localhost:3000/update_primo_block_id_array',resp.data['primo_list']).then(
         res.send('Block_IDs updated')
       )
+    }
+      
     )
   })
 })
 
-app.get('/reconcile_orchestrate',(req,res)=>{
+app.get('/reconcile_orchestrate',async(req,res)=>{
   console.log("Creating reconcile blocks ...")
-  axios.get('http://localhost:3002/create_reconcile_complex')
-    .then(function (response) {
+  await axios.get('http://localhost:3002/create_reconcile_complex')
+    .then(async(response)=>{
       console.log(response.data);
       
       console.log("Updating reconcile status ...")
-      axios.get('http://localhost:3002/update_status_complex')
-        .then(function (response) {
+      await axios.get('http://localhost:3002/update_status_complex')
+        .then(async(response)=>{
           console.log(response.data);
           
           console.log("Updating Block ID for each individual transaction")
-          axios.get('http://localhost:3002/update_block_id_complex').then(
+          await axios.get('http://localhost:3002/update_block_id_complex').then(
             function(response){
               console.log(response.data)
+              res.send("Reconcile Process complete")
             }
           )
     })
     })
+    
 })
 
 app.listen(port, () => {
